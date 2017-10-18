@@ -155,6 +155,8 @@ if __name__ == "__main__":
     if not toClean:
         toClean = 'false'
     voice1 = args['voice1']
+    if not voice1:
+        voice1 = 'f'
 
     tts = TTS(textFilePath, outputPrefix, toClean)
     tts.setVoices(voice1)
