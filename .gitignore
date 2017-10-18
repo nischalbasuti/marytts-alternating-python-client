@@ -1,4 +1,5 @@
 *_mp3
 *_wav
+*.mp3
+*.wav
 env
-text
