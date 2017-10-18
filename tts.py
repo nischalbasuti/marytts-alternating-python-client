@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# HTTP + URL packages
+#Author: Nischal Srinvas Basuti
+#Date: 2017 October 17
+
 import httplib2
-from urllib.parse import urlencode, quote # For URL creation
+try:
+    #python3
+    from urllib.parse import urlencode
+except:
+    #python2
+    from urllib import urlencode
 
 import os
 import sys
@@ -61,6 +68,11 @@ class TTS(object):
     def _wav2mp3(self, prefix, count):
         cmd = "ffmpeg -i {0}_wav/{1}.wav {0}_mp3/{1}.mp3".format(prefix, count)
         subprocess.call(cmd, shell=True)
+
+    # todo
+    def _concatinate_mp3(self):
+        pass
+        
 
     # The self.run function() coverts text to speech
     # Alternates voices between lines and generates wav files in *prefix*_wav directory
