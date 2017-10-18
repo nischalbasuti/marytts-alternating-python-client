@@ -17,6 +17,10 @@ import sys
 import subprocess
 import argparse
 
+def isPython2():
+    if sys.version_info[0] < 3:
+        return True
+    return False
 
 class TTS(object):
     """docstring for TTS"""
@@ -43,7 +47,12 @@ class TTS(object):
         except FileExistsError as e:
             overwrite = ''
             while ( overwrite != 'y' ) and ( overwrite != 'n' ): 
-                overwrite = input("prefix "+outputPrefix+ " already exists, do you want to over write it? (y/n): ").lower()
+
+                if isPython2():
+                    overwrite = raw_input("prefix "+outputPrefix+ " already exists, do you want to over write it? (y/n): ").lower()
+                else:
+                    overwrite = input("prefix "+outputPrefix+ " already exists, do you want to over write it? (y/n): ").lower()
+
                 if overwrite == 'y':
                     subprocess.call(['rm', '-r', dirName])
                     print("removed "+dirName)
@@ -51,7 +60,6 @@ class TTS(object):
                 elif overwrite == 'n':
                     print("...did nothing...")
                     quit()
-
 
     # Build the query
     def _construct_query(self, text, voice_id):
