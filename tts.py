@@ -11,6 +11,7 @@ try:
 except:
     #python2
     from urllib import urlencode
+    FileExistsError = Exception #hacky python2 support
 
 import os
 import sys
@@ -32,7 +33,6 @@ class TTS(object):
         # Make wav and mp3 directories with prefix
         self._makedir("./%s_wav" % outputPrefix)
         self._makedir("./%s_mp3" % outputPrefix)
-
 
         self.voices = ["cmu-slt-hsmm", "dfki-spike-hsmm", "dfki-obadiah"]
 
@@ -80,7 +80,6 @@ class TTS(object):
     # todo
     def _concatinate_mp3(self):
         pass
-        
 
     # The self.run function() coverts text to speech
     # Alternates voices between lines and generates wav files in *prefix*_wav directory
@@ -118,6 +117,7 @@ class TTS(object):
         # Remove wav files and directory
         if self.toClean == "True":
             subprocess.call(['rm', '-r', "%s_wav" % (self.outputPrefix)])
+
 if __name__ == "__main__":
     # Get prefix name to write files to 
     ap = argparse.ArgumentParser()
