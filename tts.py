@@ -77,7 +77,7 @@ class TTS(object):
         cmd = "ffmpeg -i {0}_wav/{1}.wav {0}_mp3/{1}.mp3".format(prefix, "%02d"%count)
         subprocess.call(cmd, shell=True)
 
-    # todo
+    # TODO: working as expected server, not on laptop, make sure it's working properly.
     def _concatinate_mp3(self, files):
         concatString = "\"concat:{0}_wav/00.wav".format(self.outputPrefix)
 
@@ -85,14 +85,16 @@ class TTS(object):
         concatString += "\""
         print(concatString)
         subprocess.call("ffmpeg -i %s -acodec copy %s.mp3" % (concatString, self.outputPrefix), shell = True)
-    # todo
+
     def setVoices(self, voice):
+        maleVoices      = ['dfki-obadiah', 'dfki-obadiah-hsmm', 'dfki-spike', 'dfki-spike-hsmm', 'cmu-dbl', 'cmu-dbl-hsmm', 'cmu-rms', 'cmu-rms-hsmm'];
+        femaleVoices    = ['dfki-poppy', 'dfki-poppy-hsmm','dfki-prudence', 'dfki-prudence-hsmm', 'cmu-slt'];
         if ( voice.lower() == "male" ) or ( voice.lower() == "m" ):
-            self.voices[0] = "dfki-spike-hsmm"
-            self.voices[1] = "cmu-slt-hsmm"
+            self.voices[0] = maleVoices[0]
+            self.voices[1] = femaleVoices[0]
         elif ( voice.lower() == "female" ) or ( voice.lower() == "f" ):
-            self.voices[0] = "cmu-slt-hsmm"
-            self.voices[1] = "dfki-spike-hsmm"
+            self.voices[0] = femaleVoices[0]
+            self.voices[1] = maleVoices[0]
         pass
 
     # The self.run function() coverts text to speech
@@ -139,6 +141,7 @@ class TTS(object):
         # Remove wav files and directory
         if self.toClean.lower() == "true":
             subprocess.call(['rm', '-r', "%s_wav" % (self.outputPrefix)])
+            subprocess.call(['rm', '-r', "%s_mp3" % (self.outputPrefix)])
 
 if __name__ == "__main__":
     # Get prefix name to write files to 
