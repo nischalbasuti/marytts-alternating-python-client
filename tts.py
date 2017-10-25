@@ -37,9 +37,8 @@ class TTS(object):
                 if not line.strip():
                     pass
                 else:
-                    self.lines.append(line)
+                    self.lines.append(line.rstrip())
                     lineCount += 1
-
 
         # Make wav and mp3 directories with prefix
         self._makedir("./%s_wav" % outputPrefix)
@@ -79,7 +78,7 @@ class TTS(object):
             self.maleIndex      = 3;
             self.femaleIndex    = 2;
             self.maleRate = 1.3
-            self.femaleRate = 0.8
+            self.femaleRate = 1 
 
         self.setVoices(self.voice)
 
