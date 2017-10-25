@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 #Author: Nischal Srinvas Basuti
@@ -31,12 +31,14 @@ class TTS(object):
         self.outDir = outDir
         #ignore blank lines
         self.lines = []
+        lineCount = 0
         with open(textFilePath) as file:
             for line in file:
                 if not line.strip():
                     pass
                 else:
-                    self.lines.append(line);
+                    self.lines.append(line)
+                    lineCount += 1
 
 
         # Make wav and mp3 directories with prefix
@@ -46,26 +48,38 @@ class TTS(object):
         # Default voices
         self.voice = 'f'
         self.voices = ["cmu-slt-hsmm", "dfki-spike-hsmm"]
+        self.locale = 'en_GB'
+
+        self.maleRate = 1
+        self.femaleRate = 1
 
         # Set the voices
-        if language.lower == 'fr':
+        if language.lower() == 'fr':
             # French
+            self.locale = 'fr'
             self.maleVoices     = ['enst-dennys-hsmm', 'upmc-pierre-hsmm']
-            self.femaleVoices   = ['enst-camille-hsmm','upmc-jessica-hsmm']
-            self.maleIndex      = 0;
+            self.femaleVoices   = ['enst-camille','enst-camille-hsmm','upmc-jessica-hsmm']
+            self.maleIndex      = 1;
             self.femaleIndex    = 0;
+            self.maleRate = 1.3
+            self.femaleRate = 0.8
         elif language.lower() == 'de':
             # German
+            self.locale = 'de'
             self.maleVoices     = ['bits3-hsmm','dfki-pavoque-neutral-hsmm','dfki-pavoque-styles']
             self.femaleVoices   = ['bits1-hsmm','bits-4']
             self.maleIndex      = 0;
             self.femaleIndex    = 0;
-        else:
+            self.maleRate = 1
+            self.femaleRate = 1
+        else: #elif language.lower() == 'en':
             # English
             self.maleVoices     = ['dfki-obadiah-hsmm','dfki-spike-hsmm','cmu-dbl-hsmm','cmu-rms-hsmm'];
             self.femaleVoices   = ['dfki-poppy-hsmm','dfki-prudence-hsmm','cmu-slt-hsmm'];
             self.maleIndex      = 3;
             self.femaleIndex    = 2;
+            self.maleRate = 1.3
+            self.femaleRate = 0.8
 
         self.setVoices(self.voice)
 
@@ -95,10 +109,10 @@ class TTS(object):
                     quit()
 
     # Build the query
-    def _construct_query(self, text, voice_id):
+    def _construct_query(self, text, voice_id,locale='en_GB'):
         query_hash_voice = {"INPUT_TEXT":text,
                   "INPUT_TYPE":"TEXT", # Input text
-                  "LOCALE":"en_GB",
+                  "LOCALE":locale,
                   "VOICE":voice_id, # Voice informations  (need to be compatible)
                   "OUTPUT_TYPE":"AUDIO",
                   "AUDIO":"WAVE", # Audio informations (need both)
@@ -153,7 +167,7 @@ class TTS(object):
             voiceSwitch = not voiceSwitch
 
             # Run the query to mary http server
-            query = self._construct_query(line, voice)
+            query = self._construct_query(line, voice, self.locale)
             h_mary = httplib2.Http()
             resp, content = h_mary.request("http://%s:%s/process?" % (self.mary_host, self.mary_port), "POST", query)
             print("query = \"http://%s:%s/process?%s\"" % (self.mary_host, self.mary_port, query))
@@ -168,14 +182,14 @@ class TTS(object):
                 # Convert to mp3
                 if(self.voice == 'f') or (self.voice == 'female'):
                     if (count % 2 == 0):
-                        self._wav2mp3(self.outputPrefix, count,1)
+                        self._wav2mp3(self.outputPrefix, count,self.femaleRate)
                     else:
-                        self._wav2mp3(self.outputPrefix, count,1.3)
+                        self._wav2mp3(self.outputPrefix, count,self.maleRate)
                 elif(self.voice == 'm') or (self.voice == 'male'):
                     if (count % 2 == 0):
-                        self._wav2mp3(self.outputPrefix, count,1.3)
+                        self._wav2mp3(self.outputPrefix, count,self.maleRate)
                     else:
-                        self._wav2mp3(self.outputPrefix, count,1)
+                        self._wav2mp3(self.outputPrefix, count,self.femaleRate)
 
                 # TODO check if useful
                 wav_files.append("./%s_wav/%02d.wav" % (self.outputPrefix, count))
