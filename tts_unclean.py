@@ -51,7 +51,8 @@ class TTS(object):
         self._makedir("./%s_mp3" % outputPrefix)
 
         # Default voices
-        self.voice = 'f'
+        self.voice1 = 'f'
+        self.voice2 = 'f'
         self.voices = ["cmu-slt-hsmm", "dfki-spike-hsmm"]
         self.locale = 'en_GB'
 
@@ -66,8 +67,8 @@ class TTS(object):
             self.femaleVoices   = ['enst-camille','enst-camille-hsmm','upmc-jessica-hsmm']
             self.maleIndex      = 1;
             self.femaleIndex    = 0;
-            self.maleRate = 1.3
-            self.femaleRate = 0.8
+            self.maleRate = 1
+            self.femaleRate = 0.7
         elif language.lower() == 'de':
             # German
             self.locale = 'de'
@@ -75,18 +76,18 @@ class TTS(object):
             self.femaleVoices   = ['bits1-hsmm','bits-4']
             self.maleIndex      = 0;
             self.femaleIndex    = 0;
-            self.maleRate = 1
-            self.femaleRate = 1
+            self.maleRate = 0.8
+            self.femaleRate = 0.8
         else: #elif language.lower() == 'en':
             # English
             self.maleVoices     = ['dfki-obadiah-hsmm','dfki-spike-hsmm','cmu-dbl-hsmm','cmu-rms-hsmm'];
             self.femaleVoices   = ['dfki-poppy-hsmm','dfki-prudence-hsmm','cmu-slt-hsmm'];
             self.maleIndex      = 3;
             self.femaleIndex    = 2;
-            self.maleRate = 1.3
+            self.maleRate = 1
             self.femaleRate = 1 
 
-        self.setVoices(self.voice)
+        self.setVoices(self.voice1, self.voice2)
 
         # Mary server informations
         self.mary_host = "localhost"
@@ -142,15 +143,18 @@ class TTS(object):
         subprocess.call("mp3wrap {1}/{0}.mp3 {0}_mp3/*.mp3".format(self.outputPrefix, self.outDir), shell = True)
 
     # Set's the gender of the first voice based on argument, and set's second voice as opposite gender
-    def setVoices(self, voice):
-        self.voice = voice
-        if ( voice.lower() == "male" ) or ( voice.lower() == "m" ):
+    def setVoices(self, voice1, voice2):
+        self.voice1 = voice1
+        self.voice2 = voice2
+        if ( voice1.lower() == "male" ) or ( voice1.lower() == "m" ):
             self.voices[0] = self.maleVoices[self.maleIndex]
-            self.voices[1] = self.femaleVoices[self.femaleIndex]
-        elif ( voice.lower() == "female" ) or ( voice.lower() == "f" ):
+        elif ( voice1.lower() == "female" ) or ( voice1.lower() == "f" ):
             self.voices[0] = self.femaleVoices[self.femaleIndex]
-            self.voices[1] = self.maleVoices[self.maleIndex]
 
+        if ( voice2.lower() == "male" ) or ( voice2.lower() == "m" ):
+            self.voices[1] = self.maleVoices[self.maleIndex]
+        elif ( voice2.lower() == "female" ) or ( voice2.lower() == "f" ):
+            self.voices[1] = self.femaleVoices[self.femaleIndex]
     # The self.run function() coverts text to speech
     # Alternates voices between lines and generates wav files in *prefix*_wav directory
     # The files in *prefix*_wav are then coverted to mp3 in the *prefix*_mp3 directory
@@ -185,16 +189,22 @@ class TTS(object):
                 f.close()
 
                 # Convert to mp3
-                if(self.voice == 'f') or (self.voice == 'female'):
-                    if (count % 2 == 0):
+                if self.voice1 != self.voice2:
+                    if(self.voice1 == 'f') or (self.voice1 == 'female'):
+                        if (count % 2 == 0):
+                            self._wav2mp3(self.outputPrefix, count,self.femaleRate)
+                        else:
+                            self._wav2mp3(self.outputPrefix, count,self.maleRate)
+                    elif(self.voice1 == 'm') or (self.voice1 == 'male'):
+                        if (count % 2 == 0):
+                            self._wav2mp3(self.outputPrefix, count,self.maleRate)
+                        else:
+                            self._wav2mp3(self.outputPrefix, count,self.femaleRate)
+                elif (self.voice1 == 'f') or (self.voice1 == 'female'):
                         self._wav2mp3(self.outputPrefix, count,self.femaleRate)
-                    else:
+                elif (self.voice1 == 'm') or (self.voice1 == 'male'):
                         self._wav2mp3(self.outputPrefix, count,self.maleRate)
-                elif(self.voice == 'm') or (self.voice == 'male'):
-                    if (count % 2 == 0):
-                        self._wav2mp3(self.outputPrefix, count,self.maleRate)
-                    else:
-                        self._wav2mp3(self.outputPrefix, count,self.femaleRate)
+
 
                 # TODO check if useful
                 wav_files.append("./%s_wav/%02d.wav" % (self.outputPrefix, count))
@@ -232,7 +242,9 @@ if __name__ == "__main__":
     voice1 = args['voice1']
     if not voice1:
         voice1 = 'f'
+    if not voice2:
+        voice2 = 'm'
 
     tts = TTS(textFilePath, outputPrefix, toClean, language, language+"_audio")
-    tts.setVoices(voice1)
+    tts.setVoices(voice1, voice2)
     tts.run()
